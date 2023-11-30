@@ -46,5 +46,6 @@
   },
   "devDependencies": {
     "gh-pages": "^6.1.0"
-  }
+  },
+  "homepage": "https://sylviazhang16.github.io/SI579_final/"
 }
