@@ -3,7 +3,10 @@ import WeatherDisplay from './components/WeatherDisplay';
 import Forecast from './components/Forecast';
 import SearchBar from './components/SearchBar';
 import CityWeather from './components/CityWeather';
-import { CircularProgress, Button } from '@material-ui/core';
+import { CircularProgress, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@material-ui/core';
+import { Accordion, AccordionSummary, AccordionDetails, Typography } from '@material-ui/core';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+
 
 const App = () => {
     const API_KEY = "90f56af41892db057bb6910fb445645d"; 
@@ -19,7 +22,23 @@ const App = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [showCurrentLocationForecast, setShowCurrentLocationForecast] = useState(false);
 
+    const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
 
+    const [isCurrentLocationAccordionExpanded, setIsCurrentLocationAccordionExpanded] = useState(false);
+    const [isSavedCitiesAccordionExpanded, setIsSavedCitiesAccordionExpanded] = useState(false);
+
+
+    const handleCurrentLocationAccordionChange = (event, isExpanded) => {
+        setIsCurrentLocationAccordionExpanded(isExpanded);
+    };
+
+    const handleSavedCitiesAccordionChange = (event, isExpanded) => {
+        setIsSavedCitiesAccordionExpanded(isExpanded);
+    };
+
+    const handleCloseErrorModal = () => {
+        setIsErrorModalOpen(false);
+    };
 
     const savedCitiesSectionStyle = {
         backgroundColor: '#f0f0f0', 
@@ -67,6 +86,31 @@ const App = () => {
         margin: '10px 0',
     };
 
+    const accordionDetailsStyle = {
+        display: 'block', 
+    };
+
+    const accordionTitleStyle = {
+        fontSize: '1.5rem', 
+        fontWeight: 'bold', 
+        color: '#333', 
+    };
+
+    const mainContainerStyle = {
+        padding: '20px', 
+        paddingLeft: '40px',
+        paddingRight: '40px',
+    };
+
+    const headerStyle = {
+        textAlign: 'center', 
+        padding: '20px 0', 
+        fontSize: '2rem', 
+        fontWeight: 'bold', 
+        color: '#333', 
+        backgroundColor: '#f8f8f8', 
+        marginBottom: '20px',
+    };
 
 
     useEffect(() => {
@@ -106,6 +150,7 @@ const App = () => {
             setWeatherData(null);
             setForecastData(null);
             setErrorMessage(error.message);
+            setIsErrorModalOpen(true); 
         }
     };
 
@@ -211,9 +256,11 @@ const App = () => {
     
 
     return (
-        <div>
+        <div style={mainContainerStyle}>
+            <div style={headerStyle}>
+                <div>My Weather App</div>
+            </div>
                  <SearchBar onSearch={handleSearch} />
-                 {errorMessage && <p>Error: {errorMessage}</p>}
                 
                  {weatherData && (
                     <WeatherDisplay 
@@ -226,8 +273,69 @@ const App = () => {
     
                 {showForecast && <Forecast forecastData={forecastData} />}
     
+                <Accordion expanded={isCurrentLocationAccordionExpanded} onChange={handleCurrentLocationAccordionChange}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                        <Typography style={accordionTitleStyle}>Current Location Weather</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails style={accordionDetailsStyle}>
+                    <div style={currentLocationStyle}>
+                        <p>Click the button to get your current location and search the weather forecast for this city.</p>
+                        <Button 
+                            onClick={handleLocationSearch} 
+                            style={buttonStyle}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? <CircularProgress size={24} /> : 'Get Weather at My Location'}
+                        </Button>
+                        {currentLocationWeather && (
+                            <>
+                                <WeatherDisplay 
+                                    weatherData={currentLocationWeather} 
+                                    onForecastToggle={toggleCurrentLocationForecast} 
+                                    isLiked={isCurrentLocationLiked()}
+                                    onLikeToggle={toggleLikeCurrentLocation}
+                                />
+                                {showCurrentLocationForecast && (
+                                    <Forecast forecastData={currentLocationForecast} />
+                                )}
+                            </>
+                        )}
+                        </div>
+                    </AccordionDetails>
+                </Accordion>
+
+                <Accordion expanded={isSavedCitiesAccordionExpanded} onChange={handleSavedCitiesAccordionChange}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                        <Typography style={accordionTitleStyle}>Saved Cities</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails style={accordionDetailsStyle}>
+                    <div style={savedCitiesSectionStyle}>
+                    {likedCities && likedCities.length > 0 ? (
+                        <div style={savedCitiesStyle}>
+                            {likedCities.map(city => (
+                                <div key={city.id} style={cityBoxStyle}>
+                                    <CityWeather 
+                                        cityData={city} 
+                                        API_KEY={API_KEY} 
+                                        isLiked={true}
+                                        onUnlikeCity={removeFromLikedCities}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    ) : <p>No saved cities.</p>}
+                     {likedCities.length > 0 && (
+                    <button 
+                        onClick={clearSavedCities}
+                        style={clearButtonStyle}>
+                        Clear Saved Cities
+                    </button>
+                )}
+                </div>
+                    </AccordionDetails>
+                </Accordion>
                           
-                <div style={currentLocationStyle}>
+                {/* <div style={currentLocationStyle}>
                     <h2>Current Location Weather</h2>
                     <Button 
                         onClick={handleLocationSearch} 
@@ -274,8 +382,27 @@ const App = () => {
                         Clear Saved Cities
                     </button>
                 )}
-                </div>
-    
+                </div> */}
+
+
+                <Dialog
+                    open={isErrorModalOpen}
+                    onClose={handleCloseErrorModal}
+                    aria-labelledby="error-dialog-title"
+                    aria-describedby="error-dialog-description"
+                >
+                    <DialogTitle id="error-dialog-title">{"Search Error"}</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id="error-dialog-description">
+                            {errorMessage}
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCloseErrorModal} color="primary">
+                            Close
+                        </Button>
+                    </DialogActions>
+                </Dialog>
                 
             </div>
         );

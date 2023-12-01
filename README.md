@@ -1,3 +1,7 @@
+# Deployed website
+
+https://sylviazhang16.github.io/SI579_final/
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
