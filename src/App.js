@@ -202,13 +202,30 @@ const App = () => {
             navigator.geolocation.getCurrentPosition(async (position) => {
                 const { latitude, longitude } = position.coords;
                 await fetchWeatherByCoords(latitude, longitude);
-            }, (error) => {
-                console.error("Error Code = " + error.code + " - " + error.message);
-                setErrorMessage("Unable to retrieve your location.");
-            });
+            }, handleLocationError);
         } else {
             setErrorMessage("Geolocation is not supported by this browser.");
+            setIsLoading(false);
         }
+    };
+
+    const handleLocationError = (error) => {
+        let errorMessage = '';
+        switch (error.code) {
+            case error.PERMISSION_DENIED:
+                errorMessage = "Location access was denied. Please enable it to use this feature.";
+                break;
+            case error.POSITION_UNAVAILABLE:
+                errorMessage = "Location information is unavailable.";
+                break;
+            case error.TIMEOUT:
+                errorMessage = "The request to get user location timed out.";
+                break;
+            default:
+                errorMessage = "An unknown error occurred while accessing location.";
+        }
+        setErrorMessage(errorMessage);
+        setIsLoading(false);
     };
 
     const fetchWeatherByCoords = async (lat, lon) => {
@@ -280,6 +297,7 @@ const App = () => {
                     <AccordionDetails style={accordionDetailsStyle}>
                     <div style={currentLocationStyle}>
                         <p>Click the button to get your current location and search the weather forecast for this city.</p>
+                        {errorMessage && <div className="error-message">{errorMessage}</div>}
                         <Button 
                             onClick={handleLocationSearch} 
                             style={buttonStyle}
@@ -334,55 +352,7 @@ const App = () => {
                 </div>
                     </AccordionDetails>
                 </Accordion>
-                          
-                {/* <div style={currentLocationStyle}>
-                    <h2>Current Location Weather</h2>
-                    <Button 
-                        onClick={handleLocationSearch} 
-                        style={buttonStyle}
-                        disabled={isLoading}
-                    >
-                        {isLoading ? <CircularProgress size={24} /> : 'Get Weather at My Location'}
-                    </Button>
-                    {currentLocationWeather && (
-                        <>
-                            <WeatherDisplay 
-                                weatherData={currentLocationWeather} 
-                                onForecastToggle={toggleCurrentLocationForecast} 
-                                isLiked={isCurrentLocationLiked()}
-                                onLikeToggle={toggleLikeCurrentLocation}
-                            />
-                            {showCurrentLocationForecast && (
-                                <Forecast forecastData={currentLocationForecast} />
-                            )}
-                        </>
-                    )}
-                </div>
-    
-                <div style={savedCitiesSectionStyle}>
-                    <h2>Saved Cities</h2>
-                    {likedCities && likedCities.length > 0 ? (
-                        <div style={savedCitiesStyle}>
-                            {likedCities.map(city => (
-                                <div key={city.id} style={cityBoxStyle}>
-                                    <CityWeather 
-                                        cityData={city} 
-                                        API_KEY={API_KEY} 
-                                        isLiked={true}
-                                        onUnlikeCity={removeFromLikedCities}
-                                    />
-                                </div>
-                            ))}
-                        </div>
-                    ) : <p>No saved cities.</p>}
-                     {likedCities.length > 0 && (
-                    <button 
-                        onClick={clearSavedCities}
-                        style={clearButtonStyle}>
-                        Clear Saved Cities
-                    </button>
-                )}
-                </div> */}
+              
 
 
                 <Dialog
