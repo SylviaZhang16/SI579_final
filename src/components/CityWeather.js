@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import WeatherDisplay from './WeatherDisplay';
 import Forecast from './Forecast';
-import { Button, CircularProgress } from '@material-ui/core';
+import { Button, CircularProgress } from '@mui/material';
 
 const CityWeather = ({ cityData, API_KEY, isLiked, onToggleForecast, onUnlikeCity }) => {
     const [showForecast, setShowForecast] = useState(false);

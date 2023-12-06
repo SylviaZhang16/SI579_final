@@ -3,9 +3,8 @@ import WeatherDisplay from './components/WeatherDisplay';
 import Forecast from './components/Forecast';
 import SearchBar from './components/SearchBar';
 import CityWeather from './components/CityWeather';
-import { CircularProgress, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@material-ui/core';
-import { Accordion, AccordionSummary, AccordionDetails, Typography } from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { CircularProgress, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Accordion, AccordionSummary, AccordionDetails, Typography } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 
 const App = () => {
@@ -16,6 +15,7 @@ const App = () => {
     const [showForecast, setShowForecast] = useState(false);
     const [likedCities, setLikedCities] = useState([]);
     const [errorMessage, setErrorMessage] = useState(null);
+    const [searchErrorMessage, setSearchErrorMessage] = useState(null);
     const [isInitialLoad, setIsInitialLoad] = useState(true);
     const [currentLocationWeather, setCurrentLocationWeather] = useState(null);
     const [currentLocationForecast, setCurrentLocationForecast] = useState(null);
@@ -133,12 +133,12 @@ const App = () => {
 
     const handleSearch = async (city) => {
         setShowForecast(false);
-        setErrorMessage(null); // Reset error message on new search
+        setSearchErrorMessage(null); 
 
         try {
             const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}`);
             if (!response.ok) {
-                throw new Error('City not found'); // Throws an error if response is not ok
+                throw new Error('City not found'); 
             }
             const data = await response.json();
 
@@ -149,7 +149,7 @@ const App = () => {
         } catch (error) {
             setWeatherData(null);
             setForecastData(null);
-            setErrorMessage(error.message);
+            setSearchErrorMessage(error.message);
             setIsErrorModalOpen(true); 
         }
     };
@@ -364,7 +364,7 @@ const App = () => {
                     <DialogTitle id="error-dialog-title">{"Search Error"}</DialogTitle>
                     <DialogContent>
                         <DialogContentText id="error-dialog-description">
-                            {errorMessage}
+                            {searchErrorMessage}
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
